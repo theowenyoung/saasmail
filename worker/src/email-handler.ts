@@ -329,6 +329,8 @@ export async function handleEmail(
     attachments: cappedAttachments,
     headers: parsed.headers,
     knownInboxes: identityRows.map((r) => r.email),
+    emailId,
+    baseUrl: env.BASE_URL,
   });
 
   // Cancel any active sequences for this person

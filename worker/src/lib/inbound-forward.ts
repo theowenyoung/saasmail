@@ -88,6 +88,10 @@ export interface BuildForwardMessageParams {
   knownInboxes: string[];
   /** Provider ceiling from `EmailSender.maxAttachmentBytes()`. */
   maxAttachmentBytes: number;
+  /** Stored `emails.id`, used for the "Open in saasmail" link. */
+  emailId: string;
+  /** `env.BASE_URL`; the link is omitted when empty. */
+  baseUrl: string;
 }
 
 function escapeHtml(s: string): string {
@@ -186,6 +190,13 @@ export function buildForwardMessage(
   }
   headerLines.push(["Authentication", authLabel]);
 
+  // Same `/m/<emailId>` permalink the webhook payload carries: it resolves to
+  // the message's thread in the web app, where replies go out from the inbox
+  // (replying in the destination mailbox sends from the personal address).
+  const messageUrl = params.baseUrl
+    ? `${params.baseUrl.replace(/\/$/, "")}/m/${encodeURIComponent(params.emailId)}`
+    : null;
+
   const noteLines: string[] = [];
   if (skippedAttachments.length > 0) {
     noteLines.push(
@@ -203,6 +214,11 @@ export function buildForwardMessage(
     ...noteLines.map(
       (n) => `<div style="margin-top:6px;color:#b45309">${escapeHtml(n)}</div>`,
     ),
+    ...(messageUrl
+      ? [
+          `<div style="margin-top:6px"><a href="${escapeHtml(messageUrl)}" style="color:#2563eb;font-weight:600">Open in saasmail &rarr;</a></div>`,
+        ]
+      : []),
     `</div>`,
   ].join("");
 
@@ -210,6 +226,7 @@ export function buildForwardMessage(
     "---------- Forwarded by saasmail ----------",
     ...headerLines.map(([k, v]) => `${k}: ${v}`),
     ...noteLines,
+    ...(messageUrl ? [`Open in saasmail: ${messageUrl}`] : []),
     "",
     "",
   ].join("\n");

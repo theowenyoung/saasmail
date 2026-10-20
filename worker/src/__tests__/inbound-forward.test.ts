@@ -30,6 +30,8 @@ function params(
     headers: {},
     knownInboxes: ["support@acme.com", "sales@acme.com"],
     maxAttachmentBytes: 1000,
+    emailId: "em_123",
+    baseUrl: "https://mail.acme.com",
     ...over,
   };
 }
@@ -239,6 +241,28 @@ describe("buildForwardMessage — body", () => {
     expect(message.text).toContain("Forwarded by saasmail");
     expect(message.text).toContain("From: Jane Customer <jane@example.com>");
     expect(message.text).toContain("Hi, I can't log in");
+  });
+
+  it("links to the message's thread in saasmail", () => {
+    const { message } = ok();
+    expect(message.html).toContain('href="https://mail.acme.com/m/em_123"');
+    expect(message.text).toContain(
+      "Open in saasmail: https://mail.acme.com/m/em_123",
+    );
+  });
+
+  it("strips a trailing slash from the base URL and encodes the id", () => {
+    const { message } = ok({
+      baseUrl: "https://mail.acme.com/",
+      emailId: "a/b",
+    });
+    expect(message.text).toContain("https://mail.acme.com/m/a%2Fb");
+  });
+
+  it("omits the link when no base URL is configured", () => {
+    const { message } = ok({ baseUrl: "" });
+    expect(message.html).not.toContain("Open in saasmail");
+    expect(message.text).not.toContain("Open in saasmail");
   });
 });
 

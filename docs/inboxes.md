@@ -50,7 +50,9 @@ How the forwarded copy looks:
   fail SPF and DMARC and get filtered harder than the block being avoided.
 - **Reply-To** the original sender, so replying reaches the customer.
 - Original `From` / `Date` / `Subject` / `Cc` and the SPF/DKIM/DMARC verdicts are
-  restated in a header block at the top of the body.
+  restated in a header block at the top of the body, followed by an **Open in
+  saasmail** link (`BASE_URL/m/<id>`) to the message's thread — reply from there to
+  answer as the inbox rather than from the destination mailbox.
 - Attachments are included, up to your provider's size ceiling; anything too large
   is named in the body rather than silently dropped. Inline images arrive as regular
   attachments.
