@@ -4,12 +4,14 @@ import {
   Route,
   Navigate,
   Outlet,
+  useLocation,
   useNavigate,
 } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandingProvider, useBranding } from "@/lib/branding";
 import { useSession } from "@/lib/auth-client";
 import { fetchPasskeyStatus } from "@/lib/api";
+import { loginPathFor } from "@/lib/return-to";
 import { useEffect, useState } from "react";
 import LoginPage from "@/pages/LoginPage";
 import ConsentPage from "@/pages/ConsentPage";
@@ -41,6 +43,7 @@ const queryClient = new QueryClient();
 function AuthGuard() {
   const { data: session, isPending } = useSession();
   const { passkeyRequired, loaded: brandingLoaded } = useBranding();
+  const location = useLocation();
   const [passkeyStatus, setPasskeyStatus] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -71,7 +74,7 @@ function AuthGuard() {
   }
 
   if (!session) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={loginPathFor(location)} replace />;
   }
 
   // Passkey enforcement is gated by the server (demo/dev deploys disable it).

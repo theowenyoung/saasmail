@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { Mail, Fingerprint, ArrowRight } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useBranding } from "@/lib/branding";
+import { safeReturnTo } from "@/lib/return-to";
 
 export default function LoginPage() {
   const { brandName } = useBranding();
+  const [searchParams] = useSearchParams();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [setupRequired, setSetupRequired] = useState<boolean | null>(null);
@@ -49,7 +51,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError(result.error.message || "Passkey sign-in failed");
       } else {
-        window.location.href = "/";
+        window.location.href = safeReturnTo(searchParams.get("next"));
       }
     } catch {
       setError("Passkey sign-in failed. Please try again.");
@@ -67,7 +69,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError(result.error.message || "Sign-in failed");
       } else {
-        window.location.href = "/";
+        window.location.href = safeReturnTo(searchParams.get("next"));
       }
     } catch {
       setError("Sign-in failed. Please try again.");
